@@ -5,4 +5,4 @@
 Aaro Lehtoaho \
 Rosa-Maria Myllymäki \
 Toni Taivalkoski\
-Khoi Nguyen Tran\
+Khoi Nguyen Tran
