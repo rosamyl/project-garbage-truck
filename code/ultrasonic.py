@@ -28,9 +28,9 @@ def test():
         # Measure the distance and print the value in centimeters
         distance = measure_distance()
         print("Distance: {:.2f} cm".format(distance))
-        if (distance <= 5):
+        if distance <= 5:
             lift()
-        
+
         # Wait for 1 second before taking the next measurement
         sleep(1)
 

@@ -9,25 +9,34 @@ servo_A.freq(50)
 servo_B = PWM(Pin(9))
 servo_B.freq(50)
 
+def init_servos():
+    servo_A = PWM(Pin(8))
+    servo_A.freq(50)
+    servo_B = PWM(Pin(9))
+    servo_B.freq(50)
+
 def set_angle_A(angle):
-    min_duty = 1500  # Needs to be tested
-    max_duty = 8000  # Needs to be tested
+    min_duty = 1500
+    max_duty = 8000
     duty = int((angle / 180) * (max_duty - min_duty) + min_duty)
     servo_A.duty_u16(duty)
 
 def set_angle_B(angle):
-    min_duty = 1500  # Needs to be tested
-    max_duty = 8000  # Needs to be tested
+    min_duty = 1500
+    max_duty = 8000
     duty = int((angle / 180) * (max_duty - min_duty) + min_duty)
     servo_B.duty_u16(duty)
-    
+
 def lift():
-    set_angle_A(UP_A)
-    sleep(0.03) # B executes faster
+    init_servos()
     set_angle_B(UP_B)
+    set_angle_A(UP_A)
     sleep(1)
-    set_angle_A(DOWN_A)
-    sleep(0.03)
     set_angle_B(DOWN_B)
-    
-lift()
+    set_angle_A(DOWN_A)
+    sleep(0.5)
+    servo_A.deinit()
+    servo_B.deinit()
+
+if __name__ == "__main__":
+    lift()
