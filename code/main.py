@@ -41,16 +41,21 @@ def process_distances(distances: list[float], previous_direction: bool) -> None:
 
     if longer_distances_before and longer_distances_after:
         turn_on_place(not previous_direction, FAST, 30, stop_on_distance=min_distance)
-        if measure_distance() <= min_distance:
+        if 0 < measure_distance() <= min_distance:
             object_on_scoop = drive_to_target(min_distance)
             if object_on_scoop:
                 lift()
                 turn_on_place(previous_direction, FAST, 90)
             return
 
-    # TODO : Check if there is a wall in front
+    average_distance = sum(distances) / len(distances)
+    max_distance = max(distances)
+    if average_distance < 20 and max_distance < 25:
+        # Wall in front
+        turn_on_place(previous_direction, FAST, 180)
+        return
 
-    print("No actions")
+    print("No actions taken.")
 
 if __name__ == "__main__":
     sleep(1)

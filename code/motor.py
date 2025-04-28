@@ -1,5 +1,5 @@
+from time import sleep, time
 from machine import Pin, PWM
-from time import sleep
 from ultrasonic import scan_distances, measure_distance
 from servos import lift, DISTANCE_TO_LIFT
 
@@ -64,7 +64,7 @@ def turn_on_place(direction: bool, speed: int, degree: int, stop_on_distance=Non
         while time_elapsed < time_to_turn:
             time_elapsed += 0.1
             distance = measure_distance()
-            if distance <= stop_on_distance:
+            if 0 < distance <= stop_on_distance:
                 break
             sleep(0.1)
     stop()
@@ -73,9 +73,9 @@ def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, time: fl
     """Turns while driving and returns the measured distances."""
     a_speed, b_speed = speed, speed
     if turn_direction == LEFT:
-        a_speed, b_speed = speed / 2, speed
+        a_speed, b_speed = int(speed / 2), speed
     else:
-        a_speed, b_speed = speed, speed / 2
+        a_speed, b_speed = speed, int(speed / 2)
 
     motor_directions(drive_direction, drive_direction)
     motor_speeds(a_speed, b_speed)
@@ -90,9 +90,14 @@ def drive_to_target(distance: float) -> bool:
     motor_directions(FORWARD, FORWARD)
     motor_speeds(FASTEST, FASTEST)
 
+    start_time = time()
+
     while True:
         sleep(0.1)
         measured_distance = measure_distance()
+
+        if measured_distance < 0:
+            continue
 
         if measured_distance <= DISTANCE_TO_LIFT:
             double_check_distance = measure_distance()
@@ -106,18 +111,25 @@ def drive_to_target(distance: float) -> bool:
             # Target lost, try to find it again
             stop()
             turn_on_place(LEFT, FAST, 15, stop_on_distance=distance)
-            if measure_distance() <= distance:
+            if 0 < measure_distance() <= distance:
                 continue
             turn_on_place(RIGHT, FAST, 30, stop_on_distance=distance)
             if measure_distance() > distance:
                 stop()
                 return False
+        if time() - start_time > 10:
+            # Timeout:
+            stop()
+            return False
 
 def test_motors() -> None:
     """Tests the motors by driving in all directions."""
     drive(FORWARD, FASTEST, 2)
     drive(BACKWARD, FAST, 2)
-    drive_turn(FORWARD, LEFT, FAST, 90)
-    drive_turn(FORWARD, RIGHT, FAST, 90)
+    drive_turn(FORWARD, LEFT, FAST, 2)
+    drive_turn(FORWARD, RIGHT, FAST, 2)
     turn_on_place(LEFT, FAST, 180)
     turn_on_place(RIGHT, FASTEST, 90)
+
+if __name__ == "__main__":
+    test_motors()

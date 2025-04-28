@@ -13,6 +13,7 @@ servo_B.freq(50)
 
 def init_servos() -> None:
     """Initializes the servos."""
+    global servo_A, servo_B
     servo_A = PWM(Pin(8))
     servo_A.freq(50)
     servo_B = PWM(Pin(9))
