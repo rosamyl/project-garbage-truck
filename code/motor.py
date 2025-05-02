@@ -28,6 +28,7 @@ def motor_speeds(duty_a: int, duty_b: int) -> None:
 
 def motor_directions(dir_a: bool, dir_b: bool) -> None:
     """Sets the motor directions. True = forward, False = backward."""
+    dir_a = not dir_a
     in1.value(1 if dir_a else 0)
     in2.value(0 if dir_a else 1)
     in3.value(1 if dir_b else 0)
@@ -73,9 +74,10 @@ def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, drive_ti
     """Turns while driving and returns the measured distances."""
     a_speed, b_speed = speed, speed
     if turn_direction == LEFT:
-        a_speed, b_speed = int(speed / 2), speed
+
+        a_speed -= 15000
     else:
-        a_speed, b_speed = speed, int(speed / 2)
+        b_speed -= 15000
 
     motor_directions(drive_direction, drive_direction)
     motor_speeds(a_speed, b_speed)
@@ -126,8 +128,8 @@ def test_motors() -> None:
     """Tests the motors by driving in all directions."""
     drive(FORWARD, FASTEST, 2)
     drive(BACKWARD, FAST, 2)
-    drive_turn(FORWARD, LEFT, FAST, 2)
-    drive_turn(FORWARD, RIGHT, FAST, 2)
+    drive_turn(FORWARD, LEFT, FASTEST, 2)
+    drive_turn(FORWARD, RIGHT, FASTEST, 2)
     turn_on_place(LEFT, FAST, 180)
     turn_on_place(RIGHT, FASTEST, 90)
 

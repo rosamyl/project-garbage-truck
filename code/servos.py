@@ -1,10 +1,10 @@
 from machine import Pin, PWM
 from time import sleep
 
-DOWN_A, UP_A = 110, 0
-DOWN_B, UP_B = 50, 160
+DOWN_A, UP_A = 120, 0
+DOWN_B, UP_B = 50, 170
 
-DISTANCE_TO_LIFT = 6 # cm
+DISTANCE_TO_LIFT = 7.5 # cm
 
 servo_A = PWM(Pin(8))
 servo_A.freq(50)
@@ -50,7 +50,7 @@ def fast_lift() -> None:
 
 def lift() -> None:
     """Lifts the servos up and down slowly."""
-    init_servos()
+    #init_servos()
 
     duty_a_down = get_duty(DOWN_A)
     duty_a_up = get_duty(UP_A)
@@ -75,5 +75,5 @@ def lift() -> None:
     servo_B.deinit()
 
 if __name__ == "__main__":
-    sleep(2)
+    sleep(1)
     lift()
