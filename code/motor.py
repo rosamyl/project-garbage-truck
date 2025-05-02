@@ -37,11 +37,11 @@ def stop() -> None:
     """Stops the motors."""
     motor_speeds(0, 0)
 
-def drive(direction: bool, speed: int, time: float) -> None:
+def drive(direction: bool, speed: int, drive_time: float) -> None:
     """Drives straight in the given direction for the given time."""
     motor_directions(direction, direction)
     motor_speeds(speed, speed)
-    sleep(time)
+    sleep(drive_time)
     stop()
 
 def turn_on_place(direction: bool, speed: int, degree: int, stop_on_distance=None) -> None:
@@ -69,7 +69,7 @@ def turn_on_place(direction: bool, speed: int, degree: int, stop_on_distance=Non
             sleep(0.1)
     stop()
 
-def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, time: float) -> list[float]:
+def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, drive_time: float) -> list[float]:
     """Turns while driving and returns the measured distances."""
     a_speed, b_speed = speed, speed
     if turn_direction == LEFT:
@@ -80,7 +80,7 @@ def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, time: fl
     motor_directions(drive_direction, drive_direction)
     motor_speeds(a_speed, b_speed)
 
-    distances = scan_distances(time)
+    distances = scan_distances(drive_time)
 
     stop()
     return distances

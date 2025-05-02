@@ -26,13 +26,25 @@ def process_distances(distances: list[float], previous_direction: bool) -> None:
         turn_on_place(previous_direction, FAST, 90)
         return
 
+    average_distance = sum(distances) / len(distances)
+    min_distance = min(distances)
+    max_distance = max(distances)
+
+    if average_distance < 20 and max_distance < 25:
+        # Wall in front
+        turn_on_place(previous_direction, FAST, 180)
+        return
+
+    if average_distance > 300 and min_distance > 200:
+        # Far away and too much variance in measurements
+        return
+
     # Check if the lowest distance is significantly lower than
     # measurements before and after it which indicates an object
-    min_distance = min(distances)
     min_index = distances.index(min_distance)
-
     longer_distances_before = False
     longer_distances_after = False
+
     for i in range(1, 3):
         if min_index - i >= 0 and distances[min_index - i] >= min_distance + 20:
             longer_distances_before = True
@@ -47,13 +59,6 @@ def process_distances(distances: list[float], previous_direction: bool) -> None:
                 lift()
                 turn_on_place(previous_direction, FAST, 90)
             return
-
-    average_distance = sum(distances) / len(distances)
-    max_distance = max(distances)
-    if average_distance < 20 and max_distance < 25:
-        # Wall in front
-        turn_on_place(previous_direction, FAST, 180)
-        return
 
     print("No actions taken.")
 
