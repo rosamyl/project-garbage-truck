@@ -1,5 +1,6 @@
 from machine import Pin, PWM
 from time import sleep
+from logger import log
 
 DOWN_A, UP_A = 120, 0
 DOWN_B, UP_B = 50, 170
@@ -51,6 +52,7 @@ def fast_lift() -> None:
 def lift() -> None:
     """Lifts the servos up and down slowly."""
     #init_servos()
+    log("lifting")
 
     duty_a_down = get_duty(DOWN_A)
     duty_a_up = get_duty(UP_A)

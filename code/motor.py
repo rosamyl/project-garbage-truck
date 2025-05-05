@@ -2,6 +2,7 @@ from time import sleep, time
 from machine import Pin, PWM
 from ultrasonic import scan_distances, measure_distance
 from servos import lift, DISTANCE_TO_LIFT
+from logger import log
 
 FORWARD, BACKWARD = True, False
 RIGHT, LEFT = True, False
@@ -48,7 +49,7 @@ def drive(direction: bool, speed: int, drive_time: float) -> None:
 def turn_on_place(direction: bool, speed: int, degree: int, stop_on_distance=None) -> None:
     """Turns on place by rotating the motors in opposite directions.
        If stop_on_distance is given, it stops when the distance is measured."""
-    time_to_turn_90_deg = 1.5 # Needs to be tested
+    time_to_turn_90_deg = 5 # Needs to be tested
     time_to_turn = degree * (time_to_turn_90_deg / 90)
 
     dir_a, dir_b = FORWARD, BACKWARD
@@ -74,10 +75,9 @@ def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, drive_ti
     """Turns while driving and returns the measured distances."""
     a_speed, b_speed = speed, speed
     if turn_direction == LEFT:
-
-        a_speed -= 15000
+        a_speed = int(a_speed / 2) - 5000
     else:
-        b_speed -= 15000
+        b_speed = int(a_speed / 2) - 5000
 
     motor_directions(drive_direction, drive_direction)
     motor_speeds(a_speed, b_speed)
@@ -89,19 +89,22 @@ def drive_turn(drive_direction: bool, turn_direction: bool, speed: int, drive_ti
 
 def drive_to_target(distance: float) -> bool:
     """Drives towards the target and returns true if the target is reached."""
+    log("Target found")
+
     motor_directions(FORWARD, FORWARD)
     motor_speeds(FASTEST, FASTEST)
 
     start_time = time()
 
     while True:
-        sleep(0.1)
+        sleep(0.2)
         measured_distance = measure_distance()
 
         if measured_distance < 0:
             continue
 
         if measured_distance <= DISTANCE_TO_LIFT:
+            sleep(0.1)
             double_check_distance = measure_distance()
             if double_check_distance <= DISTANCE_TO_LIFT:
                 stop()
@@ -110,7 +113,7 @@ def drive_to_target(distance: float) -> bool:
         if measured_distance <= distance:
             distance = measured_distance
         elif measured_distance > distance + 10:
-            # Target lost, try to find it again
+            log("Target lost, try to find it again")
             stop()
             turn_on_place(LEFT, FAST, 15, stop_on_distance=distance)
             if 0 < measure_distance() <= distance:
@@ -119,18 +122,18 @@ def drive_to_target(distance: float) -> bool:
             if measure_distance() > distance:
                 stop()
                 return False
-        if time() - start_time > 10:
-            # Timeout:
+        if time() - start_time > 7:
+            log("Timeout")
             stop()
             return False
 
 def test_motors() -> None:
     """Tests the motors by driving in all directions."""
     drive(FORWARD, FASTEST, 2)
-    drive(BACKWARD, FAST, 2)
+    drive(BACKWARD, FASTEST, 2)
     drive_turn(FORWARD, LEFT, FASTEST, 2)
     drive_turn(FORWARD, RIGHT, FASTEST, 2)
-    turn_on_place(LEFT, FAST, 180)
+    turn_on_place(LEFT, FASTEST, 180)
     turn_on_place(RIGHT, FASTEST, 90)
 
 if __name__ == "__main__":

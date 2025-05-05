@@ -1,6 +1,7 @@
 from time import sleep_us, sleep
 from machine import Pin, time_pulse_us
-from servos import lift
+from servos import lift, DISTANCE_TO_LIFT
+from logger import log
 
 trigger = Pin(10, Pin.OUT)
 echo = Pin(11, Pin.IN)
@@ -21,7 +22,7 @@ def measure_distance() -> float:
     trigger.low()
 
     # Measure the duration of the echo pulse (in microseconds)
-    pulse_duration = time_pulse_us(echo, Pin.high)
+    pulse_duration = time_pulse_us(echo, Pin.high, 30000)
 
     if pulse_duration < 0:
         print("Timed out")
@@ -40,14 +41,11 @@ def scan_distances(time: float) -> list[float]:
         distance = measure_distance()
         if distance > 0:
             measured_distances.append(distance)
-            print("Distance: {:.2f} cm".format(distance))
-        sleep(0.2)
-        elapsed_time += 0.2
-
-        # TODO:
-        # It could be checked if there is a distance lower than others, which could be a object
-        # and return early. Either using moving average or comparing min value to the average.
-        # If there are multiple similarly low distances, it could be a wall or a bigger obstacle.
+            #print("Distance: {:.2f} cm".format(distance))
+            if distance < DISTANCE_TO_LIFT and len(measured_distances) > 1 and measured_distances[-2] < DISTANCE_TO_LIFT:
+                return measured_distances
+        sleep(0.3)
+        elapsed_time += 0.3
 
     return measured_distances
 

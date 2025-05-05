@@ -1,13 +1,15 @@
-from time import sleep
+from time import sleep, time
 from random import randint
 from motor import drive_turn, turn_on_place, drive_to_target, test_motors, stop, LEFT, RIGHT, FORWARD, BACKWARD, FAST, FASTEST
 from servos import lift, DISTANCE_TO_LIFT
 from ultrasonic import measure_distance
+from logger import log
 
 stop()
 
-def run() -> None:
+def run(time_to_run: int) -> None:
     """Main loop"""
+    start_time = time()
     while True:
         direction_to_turn = randint(0, 1) == 0
         driving_time = randint(2, 4)
@@ -16,14 +18,19 @@ def run() -> None:
 
         process_distances(measured_distances, direction_to_turn)
 
+        if time() - start_time > time_to_run:
+            break
+
 def process_distances(distances: list[float], previous_direction: bool) -> None:
     """Processes the measured distances and takes actions based on them."""
+    log("Distances: ")
+    log(distances)
     close_measurements = sum(1 for distance in distances if distance <= DISTANCE_TO_LIFT)
     object_on_scoop = close_measurements > 1 # To avoid lifting on measurement errors
 
     if object_on_scoop:
         lift()
-        turn_on_place(previous_direction, FAST, 90)
+        #turn_on_place(previous_direction, FASTEST, 90)
         return
 
     # Check if the lowest distance is significantly lower than
@@ -45,20 +52,18 @@ def process_distances(distances: list[float], previous_direction: bool) -> None:
             object_on_scoop = drive_to_target(min_distance)
             if object_on_scoop:
                 lift()
-                turn_on_place(previous_direction, FAST, 90)
+                #turn_on_place(previous_direction, FASTEST, 90)
             return
 
     average_distance = sum(distances) / len(distances)
     max_distance = max(distances)
     if average_distance < 20 and max_distance < 25:
-        # Wall in front
-        turn_on_place(previous_direction, FAST, 180)
+        log("Wall")
+        turn_on_place(previous_direction, FASTEST, 180)
         return
 
-    print("No actions taken.")
+    log("No actions taken.")
 
 if __name__ == "__main__":
     sleep(1)
-    test_motors()
-    sleep(1)
-    #lift()
+    run(20)
